@@ -36,15 +36,6 @@
     font-weight:700;
     color:#111827;
   }
-  .question-block {
-    margin-top:16px;
-  }
-  .radio-group {
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    margin-top:10px;
-  }
   #primeDisplay {
     margin:20px auto 10px;
     max-width:700px;
@@ -118,25 +109,12 @@
 <div class="card hidden" id="screen-finish">
   <h1>All Done!</h1>
   <p>Thank you for participating in this study.</p>
-  <div id="languagePrompt" class="hidden">
-    <p>Please answer the following final demographic question:</p>
-    <div class="question-block">
-      <p><strong>Is Mandarin your dominant language?</strong></p>
-      <div class="radio-group">
-        <label><input type="radio" name="equalComfort" value="Yes"> Yes</label>
-        <label><input type="radio" name="equalComfort" value="No"> No</label>
-      </div>
-    </div>
-    <button class="btn btn-primary" id="languageSubmitBtn">Submit responses</button>
-  </div>
 </div>
 
 <script>
-//const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhdODaAGmScToLCnJ4Gjh2M0Wq6NstgCE0s0Y_GQOP06qMvPYYJ9cG5QEcIrM_mgMtgg/exec"; // REPLACE WITH YOUR OWN SCRIPT URL
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby0XQTUy4jIU3R3cL-Q9X0mi1JXJ91Ld_F9KHccCk9Ge8N_rYjNjrqGTgpbeeZxcPhK/exec"
 const TARGET_SPREADSHEET_ID = '1iWVcFeilHJwfp1xWbP4cevxWQcjQNULkbFnIJaM_I2k'
 const TARGET_SPREADHSEET_URL = 'https://docs.google.com/spreadsheets/d/1iWVcFeilHJwfp1xWbP4cevxWQcjQNULkbFnIJaM_I2k/edit?gid=0#gid=0'
-
 
 const CONFIG = {
   trialsUrl: "../data/chad_trials.csv",
@@ -226,20 +204,21 @@ function parseMainTrials(csvText){
     if(relatedPrime) availablePrimes.push({ prime: relatedPrime, prime_label: "related_prime" });
     if(unrelatedPrime) availablePrimes.push({ prime: unrelatedPrime, prime_label: "unrelated_prime" });
 
-    for (const selectedTarget of availableTargets) {
-      for (const selectedPrime of availablePrimes) {
-        out.push({
-          trial_id: `${baseId}_${selectedTarget.target_label}_${selectedPrime.prime_label}`,
-          source_row_id: baseId,
-          prime_type: "word",
-          prime_text: selectedPrime.prime,
-          target: selectedTarget.target,
-          correct_response: selectedTarget.correctResponse,
-          trial_type: selectedPrime.prime_label,
-          target_label: selectedTarget.target_label,
-          phase: "main",
-        });
-      }
+    if(availableTargets.length > 0 && availablePrimes.length > 0){
+      const selectedTarget = availableTargets[Math.floor(Math.random() * availableTargets.length)];
+      const selectedPrime = availablePrimes[Math.floor(Math.random() * availablePrimes.length)];
+
+      out.push({
+        trial_id: `${baseId}_${selectedTarget.target_label}_${selectedPrime.prime_label}`,
+        source_row_id: baseId,
+        prime_type: "word",
+        prime_text: selectedPrime.prime,
+        target: selectedTarget.target,
+        correct_response: selectedTarget.correctResponse,
+        trial_type: selectedPrime.prime_label,
+        target_label: selectedTarget.target_label,
+        phase: "main",
+      });
     }
   }
   return out;
@@ -400,9 +379,6 @@ document.addEventListener("keydown", (e) => {
 function finishStudy(){
   hide("screen-trials");
   show("screen-finish");
-  show("languagePrompt");
-  document.getElementById("languageSubmitBtn").disabled = false;
-  document.getElementById("languageSubmitBtn").textContent = "Submit responses";
 
   sendToGoogleSheet({
     participant_id: State.participantId,
@@ -410,29 +386,6 @@ function finishStudy(){
     timestamp_iso: new Date().toISOString(),
   });
 }
-
-document.getElementById("languageSubmitBtn").onclick = () => {
-  const selected = document.querySelector('input[name="equalComfort"]:checked');
-  if(!selected){
-    alert("Please select an answer before submitting.");
-    return;
-  }
-
-  const btn = document.getElementById("languageSubmitBtn");
-  btn.disabled = true;
-  btn.textContent = "Submitting...";
-
-  sendToGoogleSheet({
-    participant_id: State.participantId,
-    block: "Final Survey",
-    question: "equalComfort",
-    response: selected.value,
-    timestamp_iso: new Date().toISOString(),
-  });
-
-  btn.textContent = "Submitted";
-  document.getElementById("languagePrompt").classList.add("hidden");
-};
 
 document.getElementById("splashBtn").onclick = async () => {
   const btn = document.getElementById("splashBtn");
