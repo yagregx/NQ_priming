@@ -247,16 +247,18 @@ function parseMainTrials(csvText){
 
 async function loadAllTrials(){
   try {
-    const resp = await fetch(CONFIG.trialsUrl);
-    if(!resp.ok) throw new Error(`Failed to load development_trials.csv (${resp.status})`);
+    const mainResp = await fetch(CONFIG.trialsUrl);
+    if(!mainResp.ok) throw new Error(`Failed to load ${CONFIG.trialsUrl} (${mainResp.status})`);
+    const mainText = await mainResp.text();
+    MAIN_TRIALS = parseMainTrials(mainText);
 
-    const text = await resp.text();
-    MAIN_TRIALS = parseMainTrials(text);
+    const practiceResp = await fetch(CONFIG.practiceUrl);
+    if(!practiceResp.ok) throw new Error(`Failed to load ${CONFIG.practiceUrl} (${practiceResp.status})`);
+    const practiceText = await practiceResp.text();
+    PRACTICE_TRIALS = parseMainTrials(practiceText).map(t => ({ ...t, phase: "practice" }));
 
-    if(MAIN_TRIALS.length === 0) throw new Error("No valid trials parsed from development_trials.csv");
-
-    // Use first 5 trials as practice until priming_practice.csv is ready
-    PRACTICE_TRIALS = MAIN_TRIALS.slice(0, 5).map(t => ({ ...t, phase: "practice" }));
+    if(MAIN_TRIALS.length === 0) throw new Error("No valid trials parsed from main trials CSV");
+    if(PRACTICE_TRIALS.length === 0) throw new Error("No valid trials parsed from practice trials CSV");
 
     return true;
   } catch (err) {
