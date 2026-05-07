@@ -414,7 +414,8 @@ function finishStudy(){
 }
 
 document.getElementById("languageSubmitBtn").onclick = () => {
-  const selected = document.querySelector('input[name="equalComfort"]:checked');
+  // radios are named "mandarinExperience" in the markup
+  const selected = document.querySelector('input[name="mandarinExperience"]:checked');
   if(!selected){
     alert("Please select an answer before submitting.");
     return;
@@ -427,7 +428,7 @@ document.getElementById("languageSubmitBtn").onclick = () => {
   sendToGoogleSheet({
     participant_id: State.participantId,
     block: "Final Survey",
-    question: "equalComfort",
+    question: "mandarinExperience",
     response: selected.value,
     timestamp_iso: new Date().toISOString(),
   });
