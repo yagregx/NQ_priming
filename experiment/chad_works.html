@@ -419,8 +419,15 @@ function finishStudy(){
 }
 
 document.getElementById("languageSubmitBtn").onclick = () => {
-  // radios are named "mandarinExperience" in the markup
-  const selected = document.querySelector('input[name="mandarinExperience"]:checked');
+  // Robustly read radio inputs by name to avoid issues with querySelector
+  const radios = document.getElementsByName("mandarinExperience");
+  let selected = null;
+  for(let i = 0; i < radios.length; i++){
+    try{
+      if(radios[i].checked){ selected = radios[i]; break; }
+    }catch(e){ /* ignore */ }
+  }
+
   if(!selected){
     alert("Please select an answer before submitting.");
     return;
@@ -434,9 +441,10 @@ document.getElementById("languageSubmitBtn").onclick = () => {
     participant_id: State.participantId,
     block: "Final Survey",
     question: "mandarinExperience",
-    response: selected.value,
+    response: (selected.value || "").toString(),
     timestamp_iso: new Date().toISOString(),
   });
+
   btn.textContent = "Submitted";
   document.getElementById("languagePrompt").classList.add("hidden");
   // show final goodbye screen
@@ -467,8 +475,3 @@ document.getElementById("instructionsNextBtn").onclick = () => {
 
 document.getElementById("startMainBtn").onclick = () => {
   startMain();
-};
-</script>
-
-</body>
-</html>
