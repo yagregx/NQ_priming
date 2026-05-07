@@ -131,6 +131,11 @@
   </div>
 </div>
 
+<div class="card hidden" id="screen-goodbye">
+  <h1>Thank you for participating.</h1>
+  <p>The experiment is now over.</p>
+</div>
+
 <script>
 //const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhdODaAGmScToLCnJ4Gjh2M0Wq6NstgCE0s0Y_GQOP06qMvPYYJ9cG5QEcIrM_mgMtgg/exec"; // REPLACE WITH YOUR OWN SCRIPT URL
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby0XQTUy4jIU3R3cL-Q9X0mi1JXJ91Ld_F9KHccCk9Ge8N_rYjNjrqGTgpbeeZxcPhK/exec"
@@ -432,9 +437,11 @@ document.getElementById("languageSubmitBtn").onclick = () => {
     response: selected.value,
     timestamp_iso: new Date().toISOString(),
   });
-
   btn.textContent = "Submitted";
   document.getElementById("languagePrompt").classList.add("hidden");
+  // show final goodbye screen
+  hide("screen-finish");
+  show("screen-goodbye");
 };
 
 document.getElementById("splashBtn").onclick = async () => {
